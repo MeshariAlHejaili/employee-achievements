@@ -1,0 +1,101 @@
+@using EmployeeAchievementss.Models
+@{
+    ViewData["Title"] = "معلوماتي وإنجازاتي";
+    var userName = ViewBag.UserName as string;
+    var userEmail = ViewBag.UserEmail as string;
+    var achievements = ViewBag.Achievements as List<Achievement>;
+}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
+<style>
+    .card {
+        border: 1px solid #43a047;
+        transition: transform 0.2s, box-shadow 0.2s;
+        background-color: #fff;
+        color: #111;
+    }
+    .card:hover {
+        transform: translateY(-8px) scale(1.03);
+        box-shadow: 0 8px 24px rgba(67, 160, 71, 0.2);
+        border-color: #388e3c;
+        cursor: pointer;
+    }
+    .card .badge {
+        background-color: #43a047 !important;
+    }
+    .card-footer {
+        background-color: #c8e6c9;
+    }
+    h2, .card-title, .card-subtitle {
+        color: #2e7d32;
+    }
+</style>
+<div class="container py-5">
+    <div class="row justify-content-center mb-4">
+        <div class="col-md-8">
+            <div class="card shadow-lg mb-4">
+                <div class="card-header bg-success text-white d-flex align-items-center">
+                    <img src="https://ui-avatars.com/api/?name=@userName&background=43a047&color=fff&rounded=true&size=48" class="rounded-circle me-3" width="48" height="48" alt="User Photo" />
+                    <div>
+                        <div class="fw-bold fs-5">@userName</div>
+                        <div class="text-muted small">@userEmail</div>
+                    </div>
+                </div>
+            </div>
+            <h5 class="mb-3"><i class="bi bi-award"></i> إنجازاتي</h5>
+            @if (achievements != null && achievements.Count > 0)
+            {
+                <div class="row row-cols-1 row-cols-md-2 g-4">
+                    @foreach (var ach in achievements)
+                    {
+                        <div class="col">
+                            <a asp-controller="Home" asp-action="Details" asp-route-id="@ach.Id" class="text-decoration-none text-reset">
+                            <div class="card h-100 shadow-sm position-relative">
+                                <div class="card-body">
+                                    <span class="badge bg-secondary mb-2">@ach.Title</span>
+                                    <h6 class="card-subtitle text-muted mb-2">@ach.Date.ToString("yyyy-MM-dd")</h6>
+                                    <p>@ach.Description</p>
+                                </div>
+                                <div class="card-footer text-muted d-flex justify-content-between align-items-center">
+                                    <span>@ach.Date.ToString("MMMM dd, yyyy")</span>
+                                    <span>
+                                        <button class="btn btn-sm btn-outline-primary me-1 edit-btn" title="تعديل"><i class="bi bi-pencil"></i></button>
+                                        <button class="btn btn-sm btn-outline-danger delete-btn" title="حذف"><i class="bi bi-trash"></i></button>
+                                    </span>
+                                </div>
+                            </div>
+                            </a>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-info">لا يوجد إنجازات حتى الآن.</div>
+            }
+        </div>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.card').forEach(function (card) {
+            card.addEventListener('click', function () {
+                card.classList.toggle('border-success');
+                card.classList.toggle('shadow-lg');
+            });
+        });
+        document.querySelectorAll('.edit-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                alert('تعديل الإنجاز (قريباً)');
+            });
+        });
+        document.querySelectorAll('.delete-btn').forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (confirm('هل أنت متأكد من حذف هذا الإنجاز؟')) {
+                    alert('تم حذف الإنجاز (قريباً)');
+                }
+            });
+        });
+    });
+</script> 
