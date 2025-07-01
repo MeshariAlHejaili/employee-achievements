@@ -1,3 +1,95 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700&display=swap');
+
+:root {
+  --amana-green: #43a047;
+  --amana-gold: #F6B800;
+  --amana-dark: #222;
+  --amana-light: #fff;
+  --amana-gray: #f5f6fa;
+}
+
+html, body {
+  font-family: 'Tajawal', Arial, Helvetica, sans-serif;
+  background: var(--amana-gray);
+  color: var(--amana-dark);
+  direction: rtl;
+}
+
+.navbar {
+  background: var(--amana-light) !important;
+  border-bottom: 3px solid var(--amana-green);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+  width: 100vw;
+  left: 0;
+  right: 0;
+  position: relative;
+}
+
+.navbar-brand {
+  color: var(--amana-green) !important;
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+
+.nav-link {
+  color: var(--amana-dark) !important;
+  margin: 0 0.5rem;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.nav-link:hover, .nav-link.active {
+  color: var(--amana-green) !important;
+}
+
+.btn-primary, .btn-primary:focus {
+  background: var(--amana-green);
+  border: none;
+  color: var(--amana-light);
+  border-radius: 2rem;
+  padding: 0.5rem 1.5rem;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+
+.btn-primary:hover {
+  background: var(--amana-gold);
+  color: var(--amana-dark);
+}
+
+.header-search {
+  border: 1px solid var(--amana-green);
+  border-radius: 2rem;
+  padding: 0.25rem 1rem;
+  margin-left: 1rem;
+  width: 200px;
+  max-width: 100%;
+}
+
+.header-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.header-icons a {
+  color: var(--amana-green);
+  font-size: 1.2rem;
+  transition: color 0.2s;
+}
+
+.header-icons a:hover {
+  color: var(--amana-gold);
+}
+
+.container {
+  background: var(--amana-light);
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 2rem 1.5rem;
+  margin-top: 2rem;
+}
+
 html {
   font-size: 14px;
 }

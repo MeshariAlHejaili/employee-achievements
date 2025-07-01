@@ -2,7 +2,7 @@
 @{
     ViewData["Title"] = "الإنجازات";
     // Simulate logged-in user for now
-    var currentUser = new User { Id = 1, Name = "تشاري براون" };
+    var currentUser = new User { Id = 1, Name = "مشاري الحربي" };
     // Simulate achievements list
     var achievements = new List<Achievement> {
         new Achievement {
@@ -10,7 +10,7 @@
             Title = "مشروع نيوسواك",
             Description = "إعادة تصميم كاملة لتدفق تأهيل المستخدمين لمشروع نيوسواك...",
             Date = new DateTime(2024, 6, 25),
-            Owner = new User { Id = 1, Name = "تشاري براون" }
+            Owner = new User { Id = 1, Name = "مشاري الحربي" }
         },
         new Achievement {
             Id = 2,
@@ -64,7 +64,7 @@
 
     <!-- Add Achievement Button -->
     <div class="mb-4 text-end">
-        <button class="btn btn-success" id="addAchievementBtn"><i class="bi bi-plus-circle"></i> إضافة إنجاز</button>
+        <a class="btn btn-success" asp-action="AddAchievement"><i class="bi bi-plus-circle"></i> إضافة إنجاز</a>
     </div>
 
     <!-- Search Bar -->
@@ -125,9 +125,6 @@
                     alert('تم حذف الإنجاز (قريباً)');
                 }
             });
-        });
-        document.getElementById('addAchievementBtn').addEventListener('click', function() {
-            alert('إضافة إنجاز جديد (قريباً)');
         });
     });
 </script>

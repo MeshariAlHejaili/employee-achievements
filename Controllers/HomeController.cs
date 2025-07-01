@@ -33,7 +33,7 @@ namespace EmployeeAchievementss.Controllers
         {
             // Simulate achievements list
             var users = new List<User> {
-                new User { Id = 1, Name = "تشاري براون" },
+                new User { Id = 1, Name = "مشاري الحربي" },
                 new User { Id = 2, Name = "سارة أحمد" }
             };
             var achievements = new List<Achievement> {
@@ -56,6 +56,21 @@ namespace EmployeeAchievementss.Controllers
             if (achievement == null)
                 return NotFound();
             return View(achievement);
+        }
+
+        public IActionResult AddAchievement()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult AddAchievement(Achievement achievement)
+        {
+            // Simulate saving the achievement (in-memory or to DB)
+            // You can add logic to save to a real database here
+            // For now, just redirect to Index
+            return RedirectToAction("Index");
         }
     }
 }

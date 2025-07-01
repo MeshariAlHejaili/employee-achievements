@@ -1,0 +1,32 @@
+@model EmployeeAchievementss.Models.Achievement
+@{
+    ViewData["Title"] = "إضافة إنجاز";
+}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="mb-4 text-center">إضافة إنجاز جديد</h2>
+            <form asp-action="AddAchievement" method="post">
+                <div class="mb-3">
+                    <label asp-for="Title" class="form-label">عنوان الإنجاز</label>
+                    <input asp-for="Title" class="form-control" required />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">وصف الإنجاز</label>
+                    <textarea asp-for="Description" class="form-control" rows="4" required></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="mb-3">
+                    <label asp-for="Date" class="form-label">تاريخ الإنجاز</label>
+                    <input asp-for="Date" type="date" class="form-control" required />
+                    <span asp-validation-for="Date" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">حفظ الإنجاز</button>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+} 
