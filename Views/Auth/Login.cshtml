@@ -1,27 +1,60 @@
 ﻿@{
-    ViewData["Title"] = "Login";
+    ViewData["Title"] = "تسجيل الدخول";
 }
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <h2 class="mb-4 text-center">Login</h2>
 
-            @if (ViewBag.Error != null)
-            {
-                <div class="alert alert-danger">@ViewBag.Error</div>
-            }
+<div class="login-container">
+    <div class="login-card">
+        <h2 class="login-title">تسجيل الدخول</h2>
 
-            <form asp-action="Login" method="post">
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email address</label>
-                    <input name="email" type="email" class="form-control" id="email" required />
+        @if (ViewBag.Error != null)
+        {
+            <div class="alert alert-danger">@ViewBag.Error</div>
+        }
+
+        <form asp-action="Login" method="post">
+            <div class="mb-4">
+                <label for="email" class="form-label">البريد الإلكتروني</label>
+                <input name="email" type="email" class="form-control" id="email" 
+                       placeholder="أدخل بريدك الإلكتروني" required />
+            </div>
+            <div class="mb-4">
+                <label for="password" class="form-label">كلمة المرور</label>
+                <input name="password" type="password" class="form-control" id="password" 
+                       placeholder="أدخل كلمة المرور" required />
+            </div>
+            <button type="submit" class="btn btn-primary">
+                <i class="bi bi-box-arrow-in-right me-2"></i>تسجيل الدخول
+            </button>
+        </form>
+        
+        <!-- Available Users Info -->
+        <div class="users-info">
+            <div class="users-title">المستخدمون المتاحون للاختبار:</div>
+            <div class="user-item">
+                <div>
+                    <div class="user-name">مشاري الحربي</div>
+                    <div class="user-email">mashari@amana.com</div>
                 </div>
-                <div class="mb-3">
-                    <label for="password" class="form-label">Password</label>
-                    <input name="password" type="password" class="form-control" id="password" required />
+                <button class="copy-btn" onclick="copyToClipboard('mashari@amana.com', '123456')">نسخ</button>
+            </div>
+            <div class="user-item">
+                <div>
+                    <div class="user-name">سارة أحمد</div>
+                    <div class="user-email">sara@amana.com</div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100">Login</button>
-            </form>
+                <button class="copy-btn" onclick="copyToClipboard('sara@amana.com', '123456')">نسخ</button>
+            </div>
+            <div class="user-item">
+                <div>
+                    <div class="user-name">أحمد محمد</div>
+                    <div class="user-email">ahmed@amana.com</div>
+                </div>
+                <button class="copy-btn" onclick="copyToClipboard('ahmed@amana.com', '123456')">نسخ</button>
+            </div>
         </div>
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/js/auth.js"></script>
+}

@@ -1,0 +1,51 @@
+/* Account Styles */
+.card {
+    border: 1px solid #43a047;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: #fff;
+    color: #111;
+}
+
+.card:hover {
+    transform: translateY(-8px) scale(1.03);
+    box-shadow: 0 8px 24px rgba(67, 160, 71, 0.2);
+    border-color: #388e3c;
+    cursor: pointer;
+}
+
+.card .badge {
+    background-color: #43a047 !important;
+}
+
+.card-footer {
+    background-color: #c8e6c9;
+}
+
+h2, .card-title, .card-subtitle {
+    color: #2e7d32;
+}
+
+.achievement-card {
+    transition: all 0.3s ease;
+}
+
+.achievement-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+}
+
+.edit-btn, .delete-btn {
+    transition: all 0.2s ease;
+}
+
+.edit-btn:hover {
+    background-color: #0073b1 !important;
+    border-color: #0073b1 !important;
+    color: white !important;
+}
+
+.delete-btn:hover {
+    background-color: #d32f2f !important;
+    border-color: #d32f2f !important;
+    color: white !important;
+} 

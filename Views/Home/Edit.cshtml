@@ -1,13 +1,25 @@
 @model EmployeeAchievementss.Models.Achievement
 @{
-    ViewData["Title"] = "إضافة إنجاز";
+    ViewData["Title"] = "تعديل الإنجاز";
 }
 
 <div class="form-container">
     <div class="form-card">
-        <h2 class="form-title">إضافة إنجاز جديد</h2>
+        <h2 class="form-title">تعديل الإنجاز</h2>
         
-        <form asp-action="AddAchievement" method="post">
+        <!-- Achievement Preview -->
+        <div class="achievement-preview">
+            <div class="preview-title">@Model.Title</div>
+            <div class="preview-description">@Model.Description</div>
+            <div class="preview-date">
+                <i class="bi bi-clock"></i> @Model.Date.ToString("MMMM dd, yyyy")
+            </div>
+        </div>
+        
+        <form asp-action="Edit" method="post">
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="OwnerId" />
+            
             <div class="mb-4">
                 <label asp-for="Title" class="form-label">عنوان الإنجاز</label>
                 <input asp-for="Title" class="form-control" placeholder="اكتب عنوان الإنجاز..." required />
@@ -29,12 +41,21 @@
             
             <div class="d-flex gap-3">
                 <button type="submit" class="btn btn-primary flex-grow-1">
-                    <i class="bi bi-check-circle me-2"></i>حفظ الإنجاز
+                    <i class="bi bi-check-circle me-2"></i>حفظ التعديلات
                 </button>
                 <a href="@Url.Action("Index")" class="btn btn-secondary">
                     <i class="bi bi-x-circle me-2"></i>إلغاء
                 </a>
             </div>
+        </form>
+        
+        <!-- Delete Button -->
+        <hr class="my-4" />
+        <form asp-action="Delete" method="post" onsubmit="return confirm('هل أنت متأكد من حذف هذا الإنجاز؟');">
+            <input type="hidden" name="id" value="@Model.Id" />
+            <button type="submit" class="btn btn-danger w-100">
+                <i class="bi bi-trash me-2"></i>حذف الإنجاز
+            </button>
         </form>
     </div>
 </div>

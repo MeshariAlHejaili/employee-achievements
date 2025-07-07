@@ -1,10 +1,18 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using EmployeeAchievementss.Models; // if you create a LoginViewModel
+using Microsoft.EntityFrameworkCore;
+using EmployeeAchievementss.Models;
 
 namespace EmployeeAchievementss.Controllers
 {
     public class AuthController : Controller
     {
+        private readonly ApplicationDbContext _context;
+
+        public AuthController(ApplicationDbContext context)
+        {
+            _context = context;
+        }
+
         [HttpGet]
         public IActionResult Login()
         {
@@ -14,15 +22,17 @@ namespace EmployeeAchievementss.Controllers
         [HttpPost]
         public IActionResult Login(string email, string password)
         {
+            // Find user in database
+            var user = _context.Users.FirstOrDefault(u => u.Email == email && u.Password == password);
             
-            if ((email == "admin@company.com" && password == "1234") || (email=="admin@a" && password=="1234"))
+            if (user != null)
             {
-                HttpContext.Session.SetInt32("UserId", 1);
-                HttpContext.Session.SetString("UserName", "تشاري براون");
+                HttpContext.Session.SetInt32("UserId", user.Id);
+                HttpContext.Session.SetString("UserName", user.Name);
                 return RedirectToAction("Index", "Home");
             }
 
-            ViewBag.Error = "Invalid login credentials";
+            ViewBag.Error = "بيانات الدخول غير صحيحة";
             return View();
         }
 

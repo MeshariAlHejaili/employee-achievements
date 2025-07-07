@@ -1,130 +1,130 @@
 ﻿@using EmployeeAchievementss.Models
+@model List<Achievement>
 @{
     ViewData["Title"] = "الإنجازات";
-    // Simulate logged-in user for now
-    var currentUser = new User { Id = 1, Name = "مشاري الحربي" };
-    // Simulate achievements list
-    var achievements = new List<Achievement> {
-        new Achievement {
-            Id = 1,
-            Title = "مشروع نيوسواك",
-            Description = "إعادة تصميم كاملة لتدفق تأهيل المستخدمين لمشروع نيوسواك...",
-            Date = new DateTime(2024, 6, 25),
-            Owner = new User { Id = 1, Name = "مشاري الحربي" }
-        },
-        new Achievement {
-            Id = 2,
-            Title = "تطوير نظام التقارير",
-            Description = "تطوير نظام تقارير جديد للإدارة...",
-            Date = new DateTime(2024, 6, 20),
-            Owner = new User { Id = 2, Name = "سارة أحمد" }
-        }
-    };
+    var currentUserId = ViewBag.CurrentUserId as int?;
 }
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
-<style>
-    body {
-        background-color: #fff;
-        color: #111;
-    }
-    .card {
-        border: 1px solid #43a047;
-        transition: transform 0.2s, box-shadow 0.2s;
-        background-color: #fff;
-        color: #111;
-    }
-    .card:hover {
-        transform: translateY(-8px) scale(1.03);
-        box-shadow: 0 8px 24px rgba(67, 160, 71, 0.2);
-        border-color: #388e3c;
-        cursor: pointer;
-    }
-    .card .badge {
-        background-color: #43a047 !important;
-    }
-    .btn-outline-secondary {
-        color: #388e3c;
-        border-color: #388e3c;
-    }
-    .btn-outline-secondary:hover {
-        background-color: #388e3c;
-        color: #fff;
-    }
-    .card-footer {
-        background-color: #c8e6c9;
-    }
-    h2, .card-title, .card-subtitle {
-        color: #2e7d32;
-    }
-</style>
 
-<div class="container py-4">
-    <h2 class="mb-4">الإنجازات</h2>
-
-    <!-- Add Achievement Button -->
-    <div class="mb-4 text-end">
-        <a class="btn btn-success" asp-action="AddAchievement"><i class="bi bi-plus-circle"></i> إضافة إنجاز</a>
-    </div>
-
+<div class="feed-container">
+    @Html.AntiForgeryToken()
     <!-- Search Bar -->
-    <div class="input-group mb-4">
-        <input type="text" class="form-control" placeholder="ابحث في الإنجازات..." />
-        <button class="btn btn-outline-secondary" type="button">بحث</button>
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="ابحث في الإنجازات..." />
     </div>
 
-    <!-- Card Grid -->
-    <div class="row row-cols-1 row-cols-md-3 g-4">
-        @foreach (var ach in achievements) {
-            <div class="col">
-                <a asp-action="Details" asp-route-id="@ach.Id" class="text-decoration-none text-reset">
-                <div class="card h-100 shadow-sm position-relative">
-                    <div class="card-body">
-                        <span class="badge bg-secondary mb-2">@ach.Title</span>
-                        <h5 class="card-title">@ach.Owner.Name</h5>
-                        <h6 class="card-subtitle text-muted mb-2">قسم افتراضي</h6>
-                        <h6 class="mt-3"><i class="bi bi-journal-text"></i> الإنجاز</h6>
-                        <p>@ach.Description</p>
+    <!-- Achievement Feed -->
+    @if (Model != null && Model.Any())
+    {
+        @foreach (var achievement in Model)
+        {
+            <div class="achievement-card" data-achievement-id="@achievement.Id">
+                <!-- Header -->
+                <div class="achievement-header">
+                    <div class="profile-pic">
+                        @(achievement.Owner?.Name?.Substring(0, 1) ?? "?")
                     </div>
-                    <div class="card-footer text-muted d-flex justify-content-between align-items-center">
-                        <span>@ach.Date.ToString("MMMM dd, yyyy")</span>
-                        <span>
-                            @if (ach.Owner.Id == currentUser.Id) {
-                                <button class="btn btn-sm btn-outline-primary me-1 edit-btn" title="تعديل"><i class="bi bi-pencil"></i></button>
-                                <button class="btn btn-sm btn-outline-danger delete-btn" title="حذف"><i class="bi bi-trash"></i></button>
-                            }
-                        </span>
+                    <div class="user-info">
+                        <h6>@achievement.Owner?.Name</h6>
+                        <p>@achievement.Owner?.Position • @achievement.Owner?.Department</p>
                     </div>
                 </div>
-                </a>
+
+                <!-- Content -->
+                <div class="achievement-content">
+                    <div class="achievement-title">@achievement.Title</div>
+                    <div class="achievement-description">@achievement.Description</div>
+                    <div class="achievement-date">
+                        <i class="bi bi-clock"></i> @achievement.Date.ToString("MMMM dd, yyyy")
+                    </div>
+                </div>
+
+                <!-- Stats -->
+                <div class="achievement-stats">
+                    <span>@achievement.LikesCount إعجاب • @achievement.CommentsCount تعليق</span>
+                </div>
+
+                <!-- Actions -->
+                <div class="achievement-actions">
+                    <button class="action-btn like-btn @(achievement.IsLikedByCurrentUser ? "liked" : "")" 
+                            data-achievement-id="@achievement.Id">
+                        <i class="bi @(achievement.IsLikedByCurrentUser ? "bi-heart-fill" : "bi-heart")"></i>
+                        إعجاب
+                    </button>
+                    <button class="action-btn comment-btn" data-achievement-id="@achievement.Id">
+                        <i class="bi bi-chat"></i>
+                        تعليق
+                    </button>
+                    <button class="action-btn share-btn">
+                        <i class="bi bi-share"></i>
+                        مشاركة
+                    </button>
+                    @if (currentUserId.HasValue && achievement.OwnerId == currentUserId.Value)
+                    {
+                        <div class="dropdown">
+                            <button class="action-btn dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots"></i>
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="@Url.Action("Edit", new { id = achievement.Id })">
+                                    <i class="bi bi-pencil me-2"></i>تعديل
+                                </a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item text-danger" href="#" 
+                                       onclick="deleteAchievement(@achievement.Id)">
+                                    <i class="bi bi-trash me-2"></i>حذف
+                                </a></li>
+                            </ul>
+                        </div>
+                    }
+                </div>
+
+                <!-- Comments Section -->
+                <div class="comments-section" id="comments-@achievement.Id" style="display: none;">
+                    @foreach (var comment in achievement.Comments)
+                    {
+                        <div class="comment">
+                            <div class="comment-pic">
+                                @(comment.User.Name.Substring(0, 1))
+                            </div>
+                            <div class="comment-content">
+                                <div class="comment-header">
+                                    <span class="comment-author">@comment.User.Name</span>
+                                    <span class="comment-date">@comment.Date.ToString("MMM dd, HH:mm")</span>
+                                </div>
+                                <div class="comment-text">@comment.Content</div>
+                            </div>
+                        </div>
+                    }
+                    
+                    <!-- Add Comment -->
+                    <div class="add-comment">
+                        <div class="comment-pic">
+                            @(Context.Session.GetString("UserName")?.Substring(0, 1) ?? "?")
+                        </div>
+                        <input type="text" class="comment-input" placeholder="اكتب تعليقاً..." />
+                        <button class="post-comment-btn">إرسال</button>
+                    </div>
+                </div>
             </div>
         }
-    </div>
+    }
+    else
+    {
+        <div class="empty-state">
+            <i class="bi bi-inbox"></i>
+            <h4>لا توجد إنجازات بعد</h4>
+            <p>كن أول من يشارك إنجازه!</p>
+        </div>
+    }
 </div>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        // Card highlight
-        document.querySelectorAll('.card').forEach(function (card) {
-            card.addEventListener('click', function () {
-                card.classList.toggle('border-success');
-                card.classList.toggle('shadow-lg');
-            });
-        });
-        // Add/Edit/Delete button handlers (to be implemented)
-        document.querySelectorAll('.edit-btn').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                alert('تعديل الإنجاز (قريباً)');
-            });
-        });
-        document.querySelectorAll('.delete-btn').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (confirm('هل أنت متأكد من حذف هذا الإنجاز؟')) {
-                    alert('تم حذف الإنجاز (قريباً)');
-                }
-            });
-        });
-    });
-</script>
+<!-- Add Achievement Button -->
+<button class="add-achievement-btn" onclick="location.href='@Url.Action("AddAchievement")'">
+    <i class="bi bi-plus"></i>
+</button>
+
+@section Scripts {
+    <script src="~/js/feed.js"></script>
+}

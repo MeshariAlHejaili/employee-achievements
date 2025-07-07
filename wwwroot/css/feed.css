@@ -1,0 +1,268 @@
+/* Feed Styles */
+body {
+    background-color: #f3f2ef;
+    color: #111;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.feed-container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 20px 0;
+}
+
+.achievement-card {
+    background: #fff;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    overflow: hidden;
+}
+
+.achievement-header {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.profile-pic {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #0073b1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    margin-right: 12px;
+}
+
+.user-info h6 {
+    margin: 0;
+    font-weight: 600;
+    color: #111;
+}
+
+.user-info p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.achievement-content {
+    padding: 16px;
+}
+
+.achievement-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #111;
+    margin-bottom: 8px;
+}
+
+.achievement-description {
+    color: #333;
+    line-height: 1.5;
+    margin-bottom: 12px;
+}
+
+.achievement-date {
+    font-size: 12px;
+    color: #666;
+    margin-bottom: 16px;
+}
+
+.achievement-stats {
+    padding: 12px 16px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    color: #666;
+}
+
+.achievement-actions {
+    padding: 0 16px 16px;
+    display: flex;
+    border-top: 1px solid #f0f0f0;
+}
+
+.action-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: #666;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border-radius: 4px;
+}
+
+.action-btn:hover {
+    background-color: #f0f0f0;
+    color: #0073b1;
+}
+
+.action-btn.liked {
+    color: #0073b1;
+}
+
+.comments-section {
+    padding: 16px;
+    border-top: 1px solid #f0f0f0;
+    background-color: #f8f9fa;
+}
+
+.comment {
+    display: flex;
+    margin-bottom: 12px;
+    gap: 12px;
+}
+
+.comment-pic {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-color: #0073b1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.comment-content {
+    flex: 1;
+    background: white;
+    padding: 8px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.comment-author {
+    font-weight: 600;
+    color: #111;
+    font-size: 13px;
+}
+
+.comment-date {
+    font-size: 11px;
+    color: #666;
+}
+
+.comment-text {
+    color: #333;
+    line-height: 1.4;
+}
+
+.add-comment {
+    display: flex;
+    gap: 12px;
+    margin-top: 12px;
+}
+
+.comment-input {
+    flex: 1;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    outline: none;
+}
+
+.comment-input:focus {
+    border-color: #0073b1;
+}
+
+.post-comment-btn {
+    background: #0073b1;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.post-comment-btn:hover {
+    background: #005a8b;
+}
+
+.add-achievement-btn {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #0073b1;
+    color: white;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0,115,177,0.3);
+    transition: transform 0.2s;
+}
+
+.add-achievement-btn:hover {
+    transform: scale(1.1);
+}
+
+.search-container {
+    background: white;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.search-input {
+    width: 100%;
+    border: 1px solid #e0e0e0;
+    border-radius: 20px;
+    padding: 12px 16px;
+    font-size: 14px;
+    outline: none;
+}
+
+.search-input:focus {
+    border-color: #0073b1;
+}
+
+/* Empty state styles */
+.empty-state {
+    text-align: center;
+    padding: 3rem 0;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    color: #ccc;
+}
+
+.empty-state h4 {
+    margin-top: 1rem;
+    color: #666;
+}
+
+.empty-state p {
+    color: #666;
+} 

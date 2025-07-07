@@ -6,29 +6,6 @@
     var achievements = ViewBag.Achievements as List<Achievement>;
 }
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />
-<style>
-    .card {
-        border: 1px solid #43a047;
-        transition: transform 0.2s, box-shadow 0.2s;
-        background-color: #fff;
-        color: #111;
-    }
-    .card:hover {
-        transform: translateY(-8px) scale(1.03);
-        box-shadow: 0 8px 24px rgba(67, 160, 71, 0.2);
-        border-color: #388e3c;
-        cursor: pointer;
-    }
-    .card .badge {
-        background-color: #43a047 !important;
-    }
-    .card-footer {
-        background-color: #c8e6c9;
-    }
-    h2, .card-title, .card-subtitle {
-        color: #2e7d32;
-    }
-</style>
 <div class="container py-5">
     <div class="row justify-content-center mb-4">
         <div class="col-md-8">
@@ -75,27 +52,7 @@
         </div>
     </div>
 </div>
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        document.querySelectorAll('.card').forEach(function (card) {
-            card.addEventListener('click', function () {
-                card.classList.toggle('border-success');
-                card.classList.toggle('shadow-lg');
-            });
-        });
-        document.querySelectorAll('.edit-btn').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                alert('تعديل الإنجاز (قريباً)');
-            });
-        });
-        document.querySelectorAll('.delete-btn').forEach(function(btn) {
-            btn.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (confirm('هل أنت متأكد من حذف هذا الإنجاز؟')) {
-                    alert('تم حذف الإنجاز (قريباً)');
-                }
-            });
-        });
-    });
-</script> 
+
+@section Scripts {
+    <script src="~/js/account.js"></script>
+} 
