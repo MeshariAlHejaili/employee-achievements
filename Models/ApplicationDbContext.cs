@@ -10,6 +10,8 @@ namespace EmployeeAchievementss.Models
         public DbSet<Achievement> Achievements { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Like> Likes { get; set; }
+        public DbSet<Manager> Managers { get; set; }
+        public DbSet<Department> Departments { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -22,7 +24,6 @@ namespace EmployeeAchievementss.Models
                 entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Email).IsRequired().HasMaxLength(100);
                 entity.Property(e => e.Password).IsRequired().HasMaxLength(100);
-                entity.Property(e => e.Department).HasMaxLength(100);
                 entity.Property(e => e.Position).HasMaxLength(100);
                 entity.Property(e => e.ProfilePicture).HasMaxLength(200);
                 
@@ -84,17 +85,68 @@ namespace EmployeeAchievementss.Models
                 entity.HasIndex(e => new { e.UserId, e.AchievementId }).IsUnique();
             });
 
-            // Seed initial data
+            // Configure Manager entity
+            modelBuilder.Entity<Manager>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.HasOne(e => e.User)
+                      .WithOne()
+                      .HasForeignKey<Manager>(e => e.UserId)
+                      .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.Department)
+                      .WithMany()
+                      .HasForeignKey(e => e.DepartmentId)
+                      .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // Configure Department entity
+            modelBuilder.Entity<Department>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired().HasMaxLength(100);
+            });
+
+            // Seed Departments
+            modelBuilder.Entity<Department>().HasData(
+                new Department { Id = 1, Name = "تطوير البرمجيات" },
+                new Department { Id = 2, Name = "إدارة المنتج" }
+            );
+
+            // Seed Managers as users
             modelBuilder.Entity<User>().HasData(
+                new User
+                {
+                    Id = 10,
+                    Name = "مدير البرمجيات",
+                    Email = "manager1@amana.com",
+                    Password = "test123",
+                    DepartmentId = 1,
+                    Position = "مدير قسم البرمجيات",
+                    CreatedAt = new DateTime(2024, 7, 17, 8, 0, 0),
+                    ManagerId = null
+                },
+                new User
+                {
+                    Id = 11,
+                    Name = "مدير المنتج",
+                    Email = "manager2@amana.com",
+                    Password = "test123",
+                    DepartmentId = 2,
+                    Position = "مدير قسم المنتج",
+                    CreatedAt = new DateTime(2024, 7, 17, 8, 0, 0),
+                    ManagerId = null
+                },
+                // Employees (ManagerId will be set via SQL after migration)
                 new User
                 {
                     Id = 1,
                     Name = "مشاري الحربي",
                     Email = "mashari@amana.com",
                     Password = "123456",
-                    Department = "تطوير البرمجيات",
+                    DepartmentId = 1,
                     Position = "مطور برمجيات",
-                    CreatedAt = new DateTime(2024, 6, 1, 8, 0, 0)
+                    CreatedAt = new DateTime(2024, 6, 1, 8, 0, 0),
+                    ManagerId = null
                 },
                 new User
                 {
@@ -102,9 +154,10 @@ namespace EmployeeAchievementss.Models
                     Name = "سارة أحمد",
                     Email = "sara@amana.com",
                     Password = "123456",
-                    Department = "إدارة المنتج",
+                    DepartmentId = 2,
                     Position = "مدير منتج",
-                    CreatedAt = new DateTime(2024, 6, 1, 8, 0, 0)
+                    CreatedAt = new DateTime(2024, 6, 1, 8, 0, 0),
+                    ManagerId = null
                 },
                 new User
                 {
@@ -112,12 +165,20 @@ namespace EmployeeAchievementss.Models
                     Name = "أحمد محمد",
                     Email = "ahmed@amana.com",
                     Password = "123456",
-                    Department = "تطوير البرمجيات",
+                    DepartmentId = 1,
                     Position = "مطور خلفي",
-                    CreatedAt = new DateTime(2024, 6, 1, 8, 0, 0)
+                    CreatedAt = new DateTime(2024, 6, 1, 8, 0, 0),
+                    ManagerId = null
                 }
             );
 
+            // Seed Managers
+            modelBuilder.Entity<Manager>().HasData(
+                new Manager { Id = 1, UserId = 10, DepartmentId = 1 },
+                new Manager { Id = 2, UserId = 11, DepartmentId = 2 }
+            );
+
+            // Seed Achievements
             modelBuilder.Entity<Achievement>().HasData(
                 new Achievement
                 {
@@ -126,6 +187,7 @@ namespace EmployeeAchievementss.Models
                     Description = "إعادة تصميم كاملة لتدفق تأهيل المستخدمين لمشروع نيوسواك، مما أدى إلى تحسين تجربة المستخدم بنسبة 40% وتقليل وقت التدريب إلى النصف.",
                     Date = new DateTime(2024, 6, 25),
                     OwnerId = 1,
+                    Status = "Pending",
                     CreatedAt = new DateTime(2024, 6, 2, 9, 0, 0)
                 },
                 new Achievement
@@ -135,6 +197,7 @@ namespace EmployeeAchievementss.Models
                     Description = "تطوير نظام تقارير جديد للإدارة يوفر رؤى شاملة عن أداء الفريق ومؤشرات الأداء الرئيسية.",
                     Date = new DateTime(2024, 6, 20),
                     OwnerId = 2,
+                    Status = "Pending",
                     CreatedAt = new DateTime(2024, 6, 2, 9, 0, 0)
                 },
                 new Achievement
@@ -144,10 +207,12 @@ namespace EmployeeAchievementss.Models
                     Description = "تحسين أداء النظام الأساسي بنسبة 60% من خلال تحسين قاعدة البيانات وتحسين الخوارزميات.",
                     Date = new DateTime(2024, 6, 18),
                     OwnerId = 3,
+                    Status = "Pending",
                     CreatedAt = new DateTime(2024, 6, 2, 9, 0, 0)
                 }
             );
 
+            // Seed Comments
             modelBuilder.Entity<Comment>().HasData(
                 new Comment
                 {
@@ -178,6 +243,7 @@ namespace EmployeeAchievementss.Models
                 }
             );
 
+            // Seed Likes
             modelBuilder.Entity<Like>().HasData(
                 new Like
                 {

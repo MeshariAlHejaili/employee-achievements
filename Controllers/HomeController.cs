@@ -32,13 +32,14 @@ namespace EmployeeAchievementss.Controllers
             // Get current user ID from session
             var currentUserId = HttpContext.Session.GetInt32("UserId");
             
-            // Get achievements with related data
+            // Get only approved achievements with related data
             var achievements = await _context.Achievements
                 .Include(a => a.Owner)
                 .Include(a => a.Comments)
                     .ThenInclude(c => c.User)
                 .Include(a => a.Likes)
                     .ThenInclude(l => l.User)
+                .Where(a => a.Status == "Approved")
                 .OrderByDescending(a => a.Date)
                 .ToListAsync();
 
@@ -394,6 +395,181 @@ namespace EmployeeAchievementss.Controllers
                 _logger.LogError(ex, "Error fetching achievements");
                 return Json(new { success = false, message = "حدث خطأ أثناء جلب الإنجازات" });
             }
+        }
+
+        // Manager Dashboard
+        public async Task<IActionResult> ManagerDashboard()
+        {
+            var currentUserId = HttpContext.Session.GetInt32("UserId");
+            if (!currentUserId.HasValue)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            // Find manager record for this user
+            var manager = await _context.Managers.FirstOrDefaultAsync(m => m.UserId == currentUserId.Value);
+            if (manager == null)
+            {
+                return Forbid(); // Not a manager
+            }
+
+            // Get pending achievements for manager's employees only (must be in manager's department and managed by this manager)
+            var pendingAchievements = await _context.Achievements
+                .Include(a => a.Owner)
+                .Where(a => a.Status == "Pending" && a.Owner.ManagerId == manager.Id)
+                .ToListAsync();
+
+            // Get employees for report filters
+            var employees = await _context.Users.Where(u => u.ManagerId == manager.Id).ToListAsync();
+            ViewBag.Manager = manager;
+            ViewBag.Employees = employees;
+            return View(pendingAchievements);
+        }
+
+        public class AchievementActionRequest
+        {
+            public int id { get; set; }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ApproveAchievement([FromBody] AchievementActionRequest req)
+        {
+            int id = req.id;
+            var currentUserId = HttpContext.Session.GetInt32("UserId");
+            if (!currentUserId.HasValue)
+            {
+                return Json(new { success = false, message = "يجب تسجيل الدخول أولاً" });
+            }
+
+            // Get manager record for this user
+            var manager = await _context.Managers.FirstOrDefaultAsync(m => m.UserId == currentUserId.Value);
+            if (manager == null)
+            {
+                return Json(new { success = false, message = "غير مصرح لك" });
+            }
+
+            // Get the achievement and its owner
+            var achievement = await _context.Achievements
+                .Include(a => a.Owner)
+                .FirstOrDefaultAsync(a => a.Id == id && a.Status == "Pending");
+            if (achievement == null)
+            {
+                _logger.LogWarning($"[ApproveAchievement] Achievement not found or not pending. AchievementId: {id}");
+                return Json(new { success = false, message = "الإنجاز غير موجود أو ليس قيد الانتظار" });
+            }
+
+            // Debug: Log all relevant IDs
+            _logger.LogInformation($"[ApproveAchievement] AchievementId: {achievement.Id}, OwnerId: {achievement.OwnerId}, Owner.ManagerId: {achievement.Owner?.ManagerId}, LoggedInManagerId: {manager.Id}");
+
+            // Check if the achievement's owner is managed by this manager
+            if (achievement.Owner == null || achievement.Owner.ManagerId != manager.Id)
+            {
+                _logger.LogWarning($"[ApproveAchievement] Manager mismatch. AchievementId: {achievement.Id}, Owner.ManagerId: {achievement.Owner?.ManagerId}, LoggedInManagerId: {manager.Id}");
+                return Json(new { success = false, message = "الإنجاز لا يتبع إدارتك" });
+            }
+
+            achievement.Status = "Approved";
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, message = "تمت الموافقة على الإنجاز" });
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> RejectAchievement([FromBody] AchievementActionRequest req)
+        {
+            int id = req.id;
+            var currentUserId = HttpContext.Session.GetInt32("UserId");
+            if (!currentUserId.HasValue)
+            {
+                return Json(new { success = false, message = "يجب تسجيل الدخول أولاً" });
+            }
+
+            // Get manager record for this user
+            var manager = await _context.Managers.FirstOrDefaultAsync(m => m.UserId == currentUserId.Value);
+            if (manager == null)
+            {
+                return Json(new { success = false, message = "غير مصرح لك" });
+            }
+
+            // Get the achievement and its owner
+            var achievement = await _context.Achievements
+                .Include(a => a.Owner)
+                .FirstOrDefaultAsync(a => a.Id == id && a.Status == "Pending");
+            if (achievement == null)
+            {
+                _logger.LogWarning($"[RejectAchievement] Achievement not found or not pending. AchievementId: {id}");
+                return Json(new { success = false, message = "الإنجاز غير موجود أو ليس قيد الانتظار" });
+            }
+
+            // Debug: Log all relevant IDs
+            _logger.LogInformation($"[RejectAchievement] AchievementId: {achievement.Id}, OwnerId: {achievement.OwnerId}, Owner.ManagerId: {achievement.Owner?.ManagerId}, LoggedInManagerId: {manager.Id}");
+
+            // Check if the achievement's owner is managed by this manager
+            if (achievement.Owner == null || achievement.Owner.ManagerId != manager.Id)
+            {
+                _logger.LogWarning($"[RejectAchievement] Manager mismatch. AchievementId: {achievement.Id}, Owner.ManagerId: {achievement.Owner?.ManagerId}, LoggedInManagerId: {manager.Id}");
+                return Json(new { success = false, message = "الإنجاز لا يتبع إدارتك" });
+            }
+
+            achievement.Status = "Rejected";
+            await _context.SaveChangesAsync();
+            return Json(new { success = true, message = "تم رفض الإنجاز" });
+        }
+
+        // Report generation (by employee, by date, summary)
+        public async Task<IActionResult> GenerateReport(string type, int? employeeId, DateTime? startDate, DateTime? endDate)
+        {
+            var currentUserId = HttpContext.Session.GetInt32("UserId");
+            if (!currentUserId.HasValue)
+            {
+                return RedirectToAction("Login", "Auth");
+            }
+
+            var manager = await _context.Managers.FirstOrDefaultAsync(m => m.UserId == currentUserId.Value);
+            if (manager == null)
+            {
+                return Forbid();
+            }
+
+            var achievements = await _context.Achievements
+                .Include(a => a.Owner)
+                .Where(a => a.Owner.DepartmentId == manager.DepartmentId && a.Status == "Approved")
+                .ToListAsync();
+
+            // Apply filters
+            if (type == "byEmployee" && employeeId.HasValue)
+            {
+                achievements = achievements.Where(a => a.OwnerId == employeeId.Value).ToList();
+            }
+            if (type == "byDate" && startDate.HasValue && endDate.HasValue)
+            {
+                achievements = achievements.Where(a => a.Date.Date >= startDate.Value.Date && a.Date.Date <= endDate.Value.Date).ToList();
+            }
+
+            object report = null;
+            switch (type)
+            {
+                case "byEmployee":
+                    report = achievements.GroupBy(a => a.Owner.Name)
+                        .Select(g => new { employee = g.Key, count = g.Count(), achievements = g.ToList() })
+                        .ToList();
+                    break;
+                case "byDate":
+                    report = achievements.GroupBy(a => a.Date.Date)
+                        .Select(g => new { date = g.Key, count = g.Count(), achievements = g.ToList() })
+                        .ToList();
+                    break;
+                case "summary":
+                default:
+                    report = new
+                    {
+                        total = achievements.Count,
+                        employees = achievements.Select(a => a.Owner.Name).Distinct().Count(),
+                        achievements = achievements
+                    };
+                    break;
+            }
+
+            return Json(new { success = true, report });
         }
     }
 }

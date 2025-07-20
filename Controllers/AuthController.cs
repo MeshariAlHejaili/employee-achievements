@@ -29,9 +29,14 @@ namespace EmployeeAchievementss.Controllers
             {
                 HttpContext.Session.SetInt32("UserId", user.Id);
                 HttpContext.Session.SetString("UserName", user.Name);
+                // Check if user is a manager
+                var isManager = _context.Managers.Any(m => m.UserId == user.Id);
+                HttpContext.Session.SetString("IsManager", isManager ? "true" : "false");
                 return RedirectToAction("Index", "Home");
             }
-
+            
+            // Log the failed login attempt for debugging
+            Console.WriteLine($"Login failed for email: {email}");
             ViewBag.Error = "بيانات الدخول غير صحيحة";
             return View();
         }
@@ -40,6 +45,24 @@ namespace EmployeeAchievementss.Controllers
         {
             HttpContext.Session.Clear();
             return RedirectToAction("Login");
+        }
+
+        // Debug action to check database
+        public IActionResult Debug()
+        {
+            try
+            {
+                var users = _context.Users.ToList();
+                return Json(new { 
+                    success = true, 
+                    userCount = users.Count,
+                    users = users.Select(u => new { u.Id, u.Name, u.Email, u.Password })
+                });
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, error = ex.Message });
+            }
         }
     }
 }

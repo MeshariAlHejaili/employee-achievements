@@ -1,28 +1,10 @@
+import { isValidEmail } from './components/isValidEmail.js';
+import { copyToClipboard } from './components/copyToClipboard.js';
+
 // Authentication JavaScript Functionality
-function copyToClipboard(email, password) {
-    // Create a temporary input element
-    const tempInput = document.createElement('input');
-    tempInput.value = `Email: ${email}\nPassword: ${password}`;
-    document.body.appendChild(tempInput);
-    
-    // Select and copy the text
-    tempInput.select();
-    document.execCommand('copy');
-    
-    // Remove the temporary element
-    document.body.removeChild(tempInput);
-    
-    // Show feedback
-    const button = event.target;
-    const originalText = button.textContent;
-    button.textContent = 'تم النسخ!';
-    button.classList.add('copied');
-    
-    setTimeout(() => {
-        button.textContent = originalText;
-        button.classList.remove('copied');
-    }, 2000);
-}
+window.copyToClipboard = function(email, password) {
+    copyToClipboard(email, password, event);
+};
 
 // Form validation for login
 document.addEventListener('DOMContentLoaded', function() {
@@ -82,10 +64,4 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-});
-
-// Email validation helper
-function isValidEmail(email) {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(email);
-} 
+}); 

@@ -15,11 +15,20 @@ namespace EmployeeAchievementss.Models
         [StringLength(200)]
         public string? ProfilePicture { get; set; }
         
-        [StringLength(100)]
-        public string? Department { get; set; }
+        // [StringLength(100)]
+        // public string? Department { get; set; }
         
         [StringLength(100)]
         public string? Position { get; set; }
+        
+        [Required]
+        public int DepartmentId { get; set; }
+        [ForeignKey("DepartmentId")]
+        public virtual Department? DepartmentRef { get; set; }
+
+        public int? ManagerId { get; set; }
+        [ForeignKey("ManagerId")]
+        public virtual Manager? Manager { get; set; }
         
         [Required]
         [StringLength(100)]

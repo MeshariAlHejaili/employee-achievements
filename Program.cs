@@ -37,7 +37,7 @@ app.UseSession();
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value?.ToLower();
-    if (!path.StartsWith("/auth/login") && !path.StartsWith("/css") && !path.StartsWith("/js") && !path.StartsWith("/lib") && !context.Session.Keys.Contains("UserId"))
+    if (!path.StartsWith("/auth/login") && !path.StartsWith("/auth/debug") && !path.StartsWith("/css") && !path.StartsWith("/js") && !path.StartsWith("/lib") && !context.Session.Keys.Contains("UserId"))
     {
         context.Response.Redirect("/Auth/Login");
         return;

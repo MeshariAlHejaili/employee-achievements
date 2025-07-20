@@ -4,6 +4,7 @@ using EmployeeAchievementss.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EmployeeAchievementss.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250712222757_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,11 +47,6 @@ namespace EmployeeAchievementss.Migrations
                     b.Property<int>("OwnerId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Status")
-                        .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
                     b.Property<string>("Title")
                         .IsRequired()
                         .HasMaxLength(200)
@@ -68,7 +66,6 @@ namespace EmployeeAchievementss.Migrations
                             Date = new DateTime(2024, 6, 25, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "إعادة تصميم كاملة لتدفق تأهيل المستخدمين لمشروع نيوسواك، مما أدى إلى تحسين تجربة المستخدم بنسبة 40% وتقليل وقت التدريب إلى النصف.",
                             OwnerId = 1,
-                            Status = "Pending",
                             Title = "مشروع نيوسواك"
                         },
                         new
@@ -78,7 +75,6 @@ namespace EmployeeAchievementss.Migrations
                             Date = new DateTime(2024, 6, 20, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "تطوير نظام تقارير جديد للإدارة يوفر رؤى شاملة عن أداء الفريق ومؤشرات الأداء الرئيسية.",
                             OwnerId = 2,
-                            Status = "Pending",
                             Title = "تطوير نظام التقارير"
                         },
                         new
@@ -88,7 +84,6 @@ namespace EmployeeAchievementss.Migrations
                             Date = new DateTime(2024, 6, 18, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Description = "تحسين أداء النظام الأساسي بنسبة 60% من خلال تحسين قاعدة البيانات وتحسين الخوارزميات.",
                             OwnerId = 3,
-                            Status = "Pending",
                             Title = "تحسين أداء النظام"
                         });
                 });
@@ -156,36 +151,6 @@ namespace EmployeeAchievementss.Migrations
                         });
                 });
 
-            modelBuilder.Entity("EmployeeAchievementss.Models.Department", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Departments");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            Name = "تطوير البرمجيات"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            Name = "إدارة المنتج"
-                        });
-                });
-
             modelBuilder.Entity("EmployeeAchievementss.Models.Like", b =>
                 {
                     b.Property<int>("Id")
@@ -242,44 +207,6 @@ namespace EmployeeAchievementss.Migrations
                         });
                 });
 
-            modelBuilder.Entity("EmployeeAchievementss.Models.Manager", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DepartmentId");
-
-                    b.HasIndex("UserId")
-                        .IsUnique();
-
-                    b.ToTable("Managers");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            DepartmentId = 1,
-                            UserId = 10
-                        },
-                        new
-                        {
-                            Id = 2,
-                            DepartmentId = 2,
-                            UserId = 11
-                        });
-                });
-
             modelBuilder.Entity("EmployeeAchievementss.Models.User", b =>
                 {
                     b.Property<int>("Id")
@@ -291,16 +218,14 @@ namespace EmployeeAchievementss.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("DepartmentId")
-                        .HasColumnType("int");
+                    b.Property<string>("Department")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Email")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<int?>("ManagerId")
-                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -322,41 +247,17 @@ namespace EmployeeAchievementss.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DepartmentId");
-
                     b.HasIndex("Email")
                         .IsUnique();
-
-                    b.HasIndex("ManagerId");
 
                     b.ToTable("Users");
 
                     b.HasData(
                         new
                         {
-                            Id = 10,
-                            CreatedAt = new DateTime(2024, 7, 17, 8, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 1,
-                            Email = "manager1@amana.com",
-                            Name = "مدير البرمجيات",
-                            Password = "test123",
-                            Position = "مدير قسم البرمجيات"
-                        },
-                        new
-                        {
-                            Id = 11,
-                            CreatedAt = new DateTime(2024, 7, 17, 8, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 2,
-                            Email = "manager2@amana.com",
-                            Name = "مدير المنتج",
-                            Password = "test123",
-                            Position = "مدير قسم المنتج"
-                        },
-                        new
-                        {
                             Id = 1,
                             CreatedAt = new DateTime(2024, 6, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 1,
+                            Department = "تطوير البرمجيات",
                             Email = "mashari@amana.com",
                             Name = "مشاري الحربي",
                             Password = "123456",
@@ -366,7 +267,7 @@ namespace EmployeeAchievementss.Migrations
                         {
                             Id = 2,
                             CreatedAt = new DateTime(2024, 6, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 2,
+                            Department = "إدارة المنتج",
                             Email = "sara@amana.com",
                             Name = "سارة أحمد",
                             Password = "123456",
@@ -376,7 +277,7 @@ namespace EmployeeAchievementss.Migrations
                         {
                             Id = 3,
                             CreatedAt = new DateTime(2024, 6, 1, 8, 0, 0, 0, DateTimeKind.Unspecified),
-                            DepartmentId = 1,
+                            Department = "تطوير البرمجيات",
                             Email = "ahmed@amana.com",
                             Name = "أحمد محمد",
                             Password = "123456",
@@ -433,52 +334,11 @@ namespace EmployeeAchievementss.Migrations
                     b.Navigation("User");
                 });
 
-            modelBuilder.Entity("EmployeeAchievementss.Models.Manager", b =>
-                {
-                    b.HasOne("EmployeeAchievementss.Models.Department", "Department")
-                        .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("EmployeeAchievementss.Models.User", "User")
-                        .WithOne()
-                        .HasForeignKey("EmployeeAchievementss.Models.Manager", "UserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("Department");
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("EmployeeAchievementss.Models.User", b =>
-                {
-                    b.HasOne("EmployeeAchievementss.Models.Department", "DepartmentRef")
-                        .WithMany()
-                        .HasForeignKey("DepartmentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("EmployeeAchievementss.Models.Manager", "Manager")
-                        .WithMany("Employees")
-                        .HasForeignKey("ManagerId");
-
-                    b.Navigation("DepartmentRef");
-
-                    b.Navigation("Manager");
-                });
-
             modelBuilder.Entity("EmployeeAchievementss.Models.Achievement", b =>
                 {
                     b.Navigation("Comments");
 
                     b.Navigation("Likes");
-                });
-
-            modelBuilder.Entity("EmployeeAchievementss.Models.Manager", b =>
-                {
-                    b.Navigation("Employees");
                 });
 
             modelBuilder.Entity("EmployeeAchievementss.Models.User", b =>

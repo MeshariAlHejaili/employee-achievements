@@ -25,6 +25,15 @@ namespace EmployeeAchievementss.Models
         
         [ForeignKey("OwnerId")]
         public virtual User? Owner { get; set; }
+
+        // [Required]
+        // public int DepartmentId { get; set; }
+        // [ForeignKey("DepartmentId")]
+        // public virtual Department? Department { get; set; }
+
+        [Required]
+        [StringLength(20)]
+        public string Status { get; set; } = "Pending";
         
         public DateTime CreatedAt { get; set; } = DateTime.Now;
         

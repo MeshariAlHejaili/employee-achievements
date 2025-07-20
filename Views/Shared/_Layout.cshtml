@@ -33,6 +33,14 @@
                         <i class="bi bi-plus-circle me-1"></i>إضافة إنجاز
                     </a>
                 </li>
+                @if (Context.Session.GetString("IsManager") == "true")
+                {
+                    <li class="nav-item">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "ManagerDashboard" ? "active" : "")" asp-controller="Home" asp-action="ManagerDashboard">
+                            <i class="bi bi-clipboard-data me-1"></i>لوحة المدير
+                        </a>
+                    </li>
+                }
             </ul>
             <div class="d-flex align-items-center ms-auto">
                 @if (Context.Session.GetInt32("UserId") != null)
