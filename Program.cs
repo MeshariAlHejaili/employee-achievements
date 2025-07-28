@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using EmployeeAchievementss.Models;
+using EmployeeAchievementss.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,9 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
+
+// Register custom services
+builder.Services.AddScoped<IFileUploadService, FileUploadService>();
 
 var app = builder.Build();
 

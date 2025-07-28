@@ -16,7 +16,7 @@
             </div>
         </div>
         
-        <form asp-action="Edit" method="post">
+        <form asp-action="Edit" method="post" enctype="multipart/form-data">
             <input type="hidden" asp-for="Id" />
             <input type="hidden" asp-for="OwnerId" />
             
@@ -37,6 +37,41 @@
                 <label asp-for="Date" class="form-label">تاريخ الإنجاز</label>
                 <input asp-for="Date" type="date" class="form-control" required />
                 <span asp-validation-for="Date" class="text-danger"></span>
+            </div>
+            
+            <!-- Current Photos -->
+            @if (Model.HasPhotos)
+            {
+                <div class="mb-4">
+                    <label class="form-label">الصور الحالية</label>
+                    <div class="current-photos-container">
+                        @foreach (var photo in Model.Photos.OrderBy(p => p.DisplayOrder))
+                        {
+                            <div class="current-photo-item" data-photo-id="@photo.Id">
+                                                                        <img src="/uploads/achievements/@photo.FullFileName" alt="Achievement Photo" />
+                                <button type="button" class="delete-photo-btn" onclick="deletePhoto(@photo.Id)">
+                                    <i class="bi bi-x"></i>
+                                </button>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            
+            <!-- Add New Photos -->
+            <div class="mb-4">
+                <label class="form-label">إضافة صور جديدة (اختياري)</label>
+                <div class="photo-upload-container">
+                    <div class="photo-upload-area" id="photoUploadArea">
+                        <div class="upload-placeholder">
+                            <i class="bi bi-camera"></i>
+                            <p>اضغط هنا لاختيار الصور</p>
+                            <small class="text-muted">يمكنك رفع حتى 4 صور، كل صورة بحد أقصى 2 ميجابايت</small>
+                        </div>
+                        <input type="file" id="photoInput" name="photos" multiple accept="image/*" class="photo-input" />
+                    </div>
+                    <div class="photo-preview-container" id="photoPreviewContainer"></div>
+                </div>
             </div>
             
             <div class="d-flex gap-3">
@@ -63,4 +98,33 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script src="~/js/forms.js"></script>
+    <script src="~/js/photo-upload.js"></script>
+    <script>
+        function deletePhoto(photoId) {
+            if (confirm('هل أنت متأكد من حذف هذه الصورة؟')) {
+                fetch('/Home/DeletePhoto', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                    },
+                    body: JSON.stringify({ photoId: photoId })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.querySelector(`[data-photo-id="${photoId}"]`).remove();
+                        // Show success message
+                        alert(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('حدث خطأ أثناء حذف الصورة');
+                });
+            }
+        }
+    </script>
 } 

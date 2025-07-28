@@ -10,6 +10,7 @@ namespace EmployeeAchievementss.Models
         public DbSet<Achievement> Achievements { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Like> Likes { get; set; }
+        public DbSet<AchievementPhoto> AchievementPhotos { get; set; }
         public DbSet<Manager> Managers { get; set; }
         public DbSet<Department> Departments { get; set; }
 
@@ -83,6 +84,23 @@ namespace EmployeeAchievementss.Models
                 
                 // Ensure a user can only like an achievement once
                 entity.HasIndex(e => new { e.UserId, e.AchievementId }).IsUnique();
+            });
+
+            // Configure AchievementPhoto entity
+            modelBuilder.Entity<AchievementPhoto>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.FileName).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.OriginalFileName).IsRequired().HasMaxLength(255);
+                entity.Property(e => e.FileExtension).IsRequired().HasMaxLength(10);
+                entity.Property(e => e.ContentType).IsRequired().HasMaxLength(50);
+                entity.Property(e => e.ThumbnailFileName).HasMaxLength(255);
+                
+                // Configure relationship with Achievement
+                entity.HasOne(e => e.Achievement)
+                      .WithMany(a => a.Photos)
+                      .HasForeignKey(e => e.AchievementId)
+                      .OnDelete(DeleteBehavior.Cascade);
             });
 
             // Configure Manager entity

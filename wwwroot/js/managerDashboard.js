@@ -7,7 +7,7 @@ toggleReportFilters();
 
 function approveAchievement(id) {
     if (!confirm('هل أنت متأكد من الموافقة على هذا الإنجاز؟')) return;
-    fetch('/Home/ApproveAchievement', {
+    fetch('/Home/ApproveAchievement', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
@@ -93,4 +93,98 @@ function renderReport(report, type) {
     } else {
         return `<h5>ملخص</h5><div>عدد الإنجازات: ${report.total}</div><div>عدد الموظفين: ${report.employees}</div>`;
     }
+}
+
+function showAchievementPhotos(achievementId) {
+    fetch(`/Home/GetAchievementPhotos?achievementId=${achievementId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) {
+                showPhotoModal(data.photos);
+            } else {
+                alert(data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('حدث خطأ أثناء جلب الصور');
+        });
+}
+
+function showPhotoModal(photos) {
+    // Create modal if it doesn't exist
+    let modal = document.getElementById('photoModal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'photoModal';
+        modal.className = 'modal fade';
+        modal.setAttribute('tabindex', '-1');
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">صور الإنجاز</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div id="photoCarousel" class="carousel slide" data-bs-ride="carousel">
+                            <div class="carousel-inner" id="photoCarouselInner">
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#photoCarousel" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon"></span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#photoCarousel" data-bs-slide="next">
+                                <span class="carousel-control-next-icon"></span>
+                            </button>
+                        </div>
+                        <div class="mt-3">
+                            <div class="row" id="photoThumbnails">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    // Populate carousel
+    const carouselInner = modal.querySelector('#photoCarouselInner');
+    const thumbnailsContainer = modal.querySelector('#photoThumbnails');
+    
+    carouselInner.innerHTML = '';
+    thumbnailsContainer.innerHTML = '';
+
+    photos.forEach((photo, index) => {
+        // Add carousel item
+        const carouselItem = document.createElement('div');
+        carouselItem.className = `carousel-item ${index === 0 ? 'active' : ''}`;
+        carouselItem.innerHTML = `
+            <img src="${photo.filePath}" class="d-block w-100" alt="Achievement Photo" style="max-height: 400px; object-fit: contain;">
+            <div class="carousel-caption d-none d-md-block">
+                <p>${photo.originalFileName}</p>
+            </div>
+        `;
+        carouselInner.appendChild(carouselItem);
+
+        // Add thumbnail
+        const thumbnailCol = document.createElement('div');
+        thumbnailCol.className = 'col-2 mb-2';
+        thumbnailCol.innerHTML = `
+            <img src="${photo.thumbnailPath}" class="img-thumbnail" alt="Thumbnail" 
+                 style="cursor: pointer; height: 60px; object-fit: cover;" 
+                 onclick="goToSlide(${index})">
+        `;
+        thumbnailsContainer.appendChild(thumbnailCol);
+    });
+
+    // Show modal
+    const bootstrapModal = new bootstrap.Modal(modal);
+    bootstrapModal.show();
+}
+
+function goToSlide(index) {
+    const carousel = document.querySelector('#photoCarousel');
+    const bsCarousel = new bootstrap.Carousel(carousel);
+    bsCarousel.to(index);
 } 

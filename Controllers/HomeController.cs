@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using EmployeeAchievementss.Models;
+using EmployeeAchievementss.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,21 +11,28 @@ namespace EmployeeAchievementss.Controllers
         public int AchievementId { get; set; }
     }
 
-    public class AddCommentRequest
-    {
-        public int AchievementId { get; set; }
-        public string Content { get; set; } = string.Empty;
-    }
+            public class AddCommentRequest
+        {
+            public int AchievementId { get; set; }
+            public string Content { get; set; } = string.Empty;
+        }
+
+        public class DeletePhotoRequest
+        {
+            public int PhotoId { get; set; }
+        }
 
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
         private readonly ApplicationDbContext _context;
+        private readonly IFileUploadService _fileUploadService;
 
-        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context)
+        public HomeController(ILogger<HomeController> logger, ApplicationDbContext context, IFileUploadService fileUploadService)
         {
             _logger = logger;
             _context = context;
+            _fileUploadService = fileUploadService;
         }
 
         public async Task<IActionResult> Index()
@@ -39,6 +47,7 @@ namespace EmployeeAchievementss.Controllers
                     .ThenInclude(c => c.User)
                 .Include(a => a.Likes)
                     .ThenInclude(l => l.User)
+                .Include(a => a.Photos.OrderBy(p => p.DisplayOrder))
                 .Where(a => a.Status == "Approved")
                 .OrderByDescending(a => a.Date)
                 .ToListAsync();
@@ -90,7 +99,7 @@ namespace EmployeeAchievementss.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> AddAchievement(Achievement achievement)
+        public async Task<IActionResult> AddAchievement(Achievement achievement, List<IFormFile> photos)
         {
             if (ModelState.IsValid)
             {
@@ -106,6 +115,24 @@ namespace EmployeeAchievementss.Controllers
 
                 _context.Achievements.Add(achievement);
                 await _context.SaveChangesAsync();
+
+                // Upload photos if provided
+                if (photos != null && photos.Any())
+                {
+                    foreach (var photo in photos.Take(4)) // Limit to 4 photos
+                    {
+                        if (photo.Length > 0)
+                        {
+                            var uploadResult = await _fileUploadService.UploadAchievementPhotoAsync(photo, achievement.Id);
+                            if (!uploadResult.Success)
+                            {
+                                // Log the error but don't fail the entire achievement creation
+                                _logger.LogWarning("Failed to upload photo for achievement {AchievementId}: {Error}", 
+                                    achievement.Id, uploadResult.ErrorMessage);
+                            }
+                        }
+                    }
+                }
 
                 return RedirectToAction("Index");
             }
@@ -124,6 +151,7 @@ namespace EmployeeAchievementss.Controllers
 
             var achievement = await _context.Achievements
                 .Include(a => a.Owner)
+                .Include(a => a.Photos.OrderBy(p => p.DisplayOrder))
                 .FirstOrDefaultAsync(a => a.Id == id);
 
             if (achievement == null)
@@ -140,7 +168,7 @@ namespace EmployeeAchievementss.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, Achievement achievement)
+        public async Task<IActionResult> Edit(int id, Achievement achievement, List<IFormFile> photos)
         {
             if (id != achievement.Id)
             {
@@ -159,6 +187,7 @@ namespace EmployeeAchievementss.Controllers
                 {
                     // Verify ownership
                     var existingAchievement = await _context.Achievements
+                        .Include(a => a.Photos)
                         .FirstOrDefaultAsync(a => a.Id == id && a.OwnerId == currentUserId.Value);
 
                     if (existingAchievement == null)
@@ -170,6 +199,26 @@ namespace EmployeeAchievementss.Controllers
                     existingAchievement.Title = achievement.Title;
                     existingAchievement.Description = achievement.Description;
                     existingAchievement.Date = achievement.Date;
+
+                    // Upload new photos if provided
+                    if (photos != null && photos.Any())
+                    {
+                        var currentPhotoCount = existingAchievement.Photos.Count;
+                        var maxNewPhotos = Math.Max(0, 4 - currentPhotoCount);
+                        
+                        foreach (var photo in photos.Take(maxNewPhotos))
+                        {
+                            if (photo.Length > 0)
+                            {
+                                var uploadResult = await _fileUploadService.UploadAchievementPhotoAsync(photo, achievement.Id);
+                                if (!uploadResult.Success)
+                                {
+                                    _logger.LogWarning("Failed to upload photo for achievement {AchievementId}: {Error}", 
+                                        achievement.Id, uploadResult.ErrorMessage);
+                                }
+                            }
+                        }
+                    }
 
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Index");
@@ -208,6 +257,9 @@ namespace EmployeeAchievementss.Controllers
             {
                 return NotFound();
             }
+
+            // Delete associated photos first
+            await _fileUploadService.DeleteAchievementPhotosAsync(id);
 
             _context.Achievements.Remove(achievement);
             await _context.SaveChangesAsync();
@@ -376,6 +428,7 @@ namespace EmployeeAchievementss.Controllers
                         .ThenInclude(c => c.User)
                     .Include(a => a.Likes)
                         .ThenInclude(l => l.User)
+                    .Include(a => a.Photos.OrderBy(p => p.DisplayOrder))
                     .OrderByDescending(a => a.Date)
                     .ToListAsync();
 
@@ -394,6 +447,108 @@ namespace EmployeeAchievementss.Controllers
             {
                 _logger.LogError(ex, "Error fetching achievements");
                 return Json(new { success = false, message = "حدث خطأ أثناء جلب الإنجازات" });
+            }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAchievementPhotos(int achievementId)
+        {
+            try
+            {
+                var currentUserId = HttpContext.Session.GetInt32("UserId");
+                if (!currentUserId.HasValue)
+                {
+                    return Json(new { success = false, message = "يجب تسجيل الدخول أولاً" });
+                }
+
+                // Get manager record for this user
+                var manager = await _context.Managers.FirstOrDefaultAsync(m => m.UserId == currentUserId.Value);
+                if (manager == null)
+                {
+                    return Json(new { success = false, message = "غير مصرح لك" });
+                }
+
+                // Get the achievement and verify it belongs to manager's employees
+                var achievement = await _context.Achievements
+                    .Include(a => a.Owner)
+                    .Include(a => a.Photos.OrderBy(p => p.DisplayOrder))
+                    .FirstOrDefaultAsync(a => a.Id == achievementId);
+
+                if (achievement == null)
+                {
+                    return Json(new { success = false, message = "الإنجاز غير موجود" });
+                }
+
+                // Check if the achievement's owner is managed by this manager
+                if (achievement.Owner.ManagerId != manager.Id)
+                {
+                    return Json(new { success = false, message = "الإنجاز لا يتبع إدارتك" });
+                }
+
+                var photos = achievement.Photos.Select(p => new
+                {
+                    id = p.Id,
+                    fileName = p.FileName,
+                    originalFileName = p.OriginalFileName,
+                    fileExtension = p.FileExtension,
+                    fileSize = p.FileSize,
+                    contentType = p.ContentType,
+                    thumbnailFileName = p.ThumbnailFileName,
+                    displayOrder = p.DisplayOrder,
+                    filePath = $"/uploads/achievements/{p.FullFileName}",
+                    thumbnailPath = $"/uploads/achievements/thumbnails/{p.FullThumbnailFileName}"
+                }).ToList();
+
+                return Json(new { success = true, photos = photos });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error getting achievement photos for achievement {AchievementId}", achievementId);
+                return Json(new { success = false, message = "حدث خطأ أثناء جلب الصور" });
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> DeletePhoto([FromBody] DeletePhotoRequest request)
+        {
+            try
+            {
+                var currentUserId = HttpContext.Session.GetInt32("UserId");
+                if (!currentUserId.HasValue)
+                {
+                    return Json(new { success = false, message = "يجب تسجيل الدخول أولاً" });
+                }
+
+                // Get the photo and verify ownership
+                var photo = await _context.AchievementPhotos
+                    .Include(p => p.Achievement)
+                    .FirstOrDefaultAsync(p => p.Id == request.PhotoId);
+
+                if (photo == null)
+                {
+                    return Json(new { success = false, message = "الصورة غير موجودة" });
+                }
+
+                // Check if current user owns the achievement
+                if (photo.Achievement.OwnerId != currentUserId.Value)
+                {
+                    return Json(new { success = false, message = "غير مصرح لك بحذف هذه الصورة" });
+                }
+
+                var success = await _fileUploadService.DeleteAchievementPhotoAsync(request.PhotoId);
+                if (success)
+                {
+                    return Json(new { success = true, message = "تم حذف الصورة بنجاح" });
+                }
+                else
+                {
+                    return Json(new { success = false, message = "حدث خطأ أثناء حذف الصورة" });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting photo {PhotoId}", request.PhotoId);
+                return Json(new { success = false, message = "حدث خطأ أثناء حذف الصورة" });
             }
         }
 
@@ -416,6 +571,7 @@ namespace EmployeeAchievementss.Controllers
             // Get pending achievements for manager's employees only (must be in manager's department and managed by this manager)
             var pendingAchievements = await _context.Achievements
                 .Include(a => a.Owner)
+                .Include(a => a.Photos.OrderBy(p => p.DisplayOrder))
                 .Where(a => a.Status == "Pending" && a.Owner.ManagerId == manager.Id)
                 .ToListAsync();
 

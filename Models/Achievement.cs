@@ -40,6 +40,7 @@ namespace EmployeeAchievementss.Models
         // Navigation properties
         public virtual ICollection<Comment> Comments { get; set; } = new List<Comment>();
         public virtual ICollection<Like> Likes { get; set; } = new List<Like>();
+        public virtual ICollection<AchievementPhoto> Photos { get; set; } = new List<AchievementPhoto>();
         
         // Computed properties (not stored in DB)
         [NotMapped]
@@ -50,6 +51,12 @@ namespace EmployeeAchievementss.Models
         
         [NotMapped]
         public bool IsLikedByCurrentUser { get; set; }
+        
+        [NotMapped]
+        public bool HasPhotos => Photos?.Any() ?? false;
+        
+        [NotMapped]
+        public AchievementPhoto? MainPhoto => Photos?.OrderBy(p => p.DisplayOrder).FirstOrDefault();
     }
 
     public class Comment
