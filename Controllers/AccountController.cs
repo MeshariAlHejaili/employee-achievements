@@ -3,7 +3,7 @@ using EmployeeAchievementss.Models;
 
 namespace EmployeeAchievementss.Controllers
 {
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         public IActionResult Info()
         {

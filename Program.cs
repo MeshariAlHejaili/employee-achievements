@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using EmployeeAchievementss.Models;
 using EmployeeAchievementss.Services;
+using QuestPDF;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +22,12 @@ builder.Services.AddSession(options =>
 
 // Register custom services
 builder.Services.AddScoped<IFileUploadService, FileUploadService>();
+builder.Services.AddScoped<ManagerService>();
+builder.Services.AddScoped<AchievementService>();
+builder.Services.AddScoped<PhotoService>();
+
+// Set QuestPDF license type
+QuestPDF.Settings.License = LicenseType.Community;
 
 var app = builder.Build();
 

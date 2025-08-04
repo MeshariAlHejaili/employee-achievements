@@ -1,7 +1,7 @@
 ﻿@using EmployeeAchievementss.Models
 @model List<Achievement>
 @{
-    ViewData["Title"] = "الإنجازات";
+    ViewData["Title"] = "Home Page";
     var currentUserId = ViewBag.CurrentUserId as int?;
 }
 
@@ -25,6 +25,10 @@
     <!-- Search Bar -->
     <div class="search-container">
         <input type="text" class="search-input" placeholder="ابحث في الإنجازات..." />
+        @if (Context.Session.GetString("IsManager") == "true")
+        {
+            <input type="text" class="search-id-input ms-2" placeholder="بحث بالمعرّف..." style="max-width: 160px;" />
+        }
     </div>
 
     <!-- Achievement Feed -->

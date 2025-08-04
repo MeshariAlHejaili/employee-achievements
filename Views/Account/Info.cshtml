@@ -25,7 +25,7 @@
                     @foreach (var ach in achievements)
                     {
                         <div class="col">
-                            <a asp-controller="Home" asp-action="Details" asp-route-id="@ach.Id" class="text-decoration-none text-reset">
+                            <a asp-controller="Feed" asp-action="Details" asp-route-id="@ach.Id" class="text-decoration-none text-reset">
                             <div class="card h-100 shadow-sm position-relative">
                                 <div class="card-body">
                                     <span class="badge bg-secondary mb-2">@ach.Title</span>

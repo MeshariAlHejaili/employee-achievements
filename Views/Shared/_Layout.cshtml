@@ -18,26 +18,26 @@
     <nav class="navbar navbar-expand-lg">
         <div class="container d-flex align-items-center justify-content-between">
             <div class="d-flex align-items-center gap-3 me-auto">
-                <a class="navbar-brand d-flex align-items-center" asp-controller="Home" asp-action="Index">
+                <a class="navbar-brand d-flex align-items-center" asp-controller="Feed" asp-action="Index">
                     <img src="/images/amana-logo.png" alt="Amana Logo" style="height:40px;width:auto;margin-left:10px;" />
                     منصة انجازات الموظفين
                 </a>
             </div>
             <ul class="navbar-nav flex-row align-items-center mx-3">
                 <li class="nav-item">
-                    <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" asp-controller="Home" asp-action="Index">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "active" : "")" asp-controller="Feed" asp-action="Index">
                         <i class="bi bi-house-door me-1"></i>الرئيسية
                     </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "AddAchievement" ? "active" : "")" asp-controller="Home" asp-action="AddAchievement">
+                    <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "AddAchievement" ? "active" : "")" asp-controller="Achievement" asp-action="AddAchievement">
                         <i class="bi bi-plus-circle me-1"></i>إضافة إنجاز
                     </a>
                 </li>
                 @if (Context.Session.GetString("IsManager") == "true")
                 {
                     <li class="nav-item">
-                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "ManagerDashboard" ? "active" : "")" asp-controller="Home" asp-action="ManagerDashboard">
+                        <a class="nav-link @(ViewContext.RouteData.Values["Action"]?.ToString() == "ManagerDashboard" ? "active" : "")" asp-controller="Manager" asp-action="ManagerDashboard">
                             <i class="bi bi-clipboard-data me-1"></i>لوحة المدير
                         </a>
                     </li>

@@ -102,7 +102,7 @@
     <script>
         function deletePhoto(photoId) {
             if (confirm('هل أنت متأكد من حذف هذه الصورة؟')) {
-                fetch('/Home/DeletePhoto', {
+                fetch('/Achievement/DeletePhoto', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',

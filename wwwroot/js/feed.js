@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const isLiked = this.classList.contains('liked');
             
             // Make AJAX call to toggle like
-            fetch('/Home/ToggleLike', {
+            fetch('/Feed/ToggleLike', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -71,7 +71,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const achievementId = achievementCard.dataset.achievementId;
                 
                 // Make AJAX call to add comment
-                fetch('/Home/AddComment', {
+                fetch('/Feed/AddComment', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -124,23 +124,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Search functionality
     const searchInput = document.querySelector('.search-input');
-    if (searchInput) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.toLowerCase();
-            const achievementCards = document.querySelectorAll('.achievement-card');
-            
-            achievementCards.forEach(function(card) {
-                const title = card.querySelector('.achievement-title').textContent.toLowerCase();
-                const description = card.querySelector('.achievement-description').textContent.toLowerCase();
-                const ownerName = card.querySelector('.user-info h6').textContent.toLowerCase();
-                
-                if (title.includes(searchTerm) || description.includes(searchTerm) || ownerName.includes(searchTerm)) {
-                    card.style.display = 'block';
-                } else {
-                    card.style.display = 'none';
-                }
-            });
+    const searchIdInput = document.querySelector('.search-id-input');
+    function filterAchievements() {
+        const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+        const searchId = searchIdInput ? searchIdInput.value.trim() : '';
+        const achievementCards = document.querySelectorAll('.achievement-card');
+        achievementCards.forEach(function(card) {
+            const title = card.querySelector('.achievement-title').textContent.toLowerCase();
+            const description = card.querySelector('.achievement-description').textContent.toLowerCase();
+            const ownerName = card.querySelector('.user-info h6').textContent.toLowerCase();
+            const cardId = card.dataset.achievementId.toString();
+            // Text filter
+            const matchesText = title.includes(searchTerm) || description.includes(searchTerm) || ownerName.includes(searchTerm);
+            // ID filter (if present)
+            const matchesId = !searchId || cardId === searchId;
+            if (matchesText && matchesId) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
         });
+    }
+    if (searchInput) {
+        searchInput.addEventListener('input', filterAchievements);
+    }
+    if (searchIdInput) {
+        searchIdInput.addEventListener('input', filterAchievements);
     }
 
     // Delete achievement functionality
@@ -148,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (confirm('هل أنت متأكد من حذف هذا الإنجاز؟')) {
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '/Home/Delete';
+            form.action = '/Achievement/Delete';
             
             const csrfToken = document.querySelector('input[name="__RequestVerificationToken"]').value;
             const csrfInput = document.createElement('input');

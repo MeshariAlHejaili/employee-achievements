@@ -7,7 +7,7 @@ toggleReportFilters();
 
 function approveAchievement(id) {
     if (!confirm('هل أنت متأكد من الموافقة على هذا الإنجاز؟')) return;
-    fetch('/Home/ApproveAchievement', { 
+    fetch('/Manager/ApproveAchievement', { 
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
@@ -25,7 +25,7 @@ function approveAchievement(id) {
 
 function rejectAchievement(id) {
     if (!confirm('هل أنت متأكد من رفض هذا الإنجاز؟')) return;
-    fetch('/Home/RejectAchievement', {
+    fetch('/Manager/RejectAchievement', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ id })
@@ -43,9 +43,16 @@ function rejectAchievement(id) {
 
 document.addEventListener('DOMContentLoaded', function () {
     document.getElementById('reportForm').addEventListener('submit', function (e) {
-        e.preventDefault();
         var type = document.getElementById('reportType').value;
-        var url = '/Home/GenerateReport?type=' + type;
+        if (type === 'summary') {
+            // Let the form submit normally for PDF download
+            this.method = 'GET';
+            this.action = '/Manager/GenerateReport';
+            return;
+        }
+        // Otherwise, handle via AJAX
+        e.preventDefault();
+        var url = '/Manager/GenerateReport?type=' + type;
         if (type === 'byEmployee') {
             var empId = document.getElementById('employeeId').value;
             if (!empId) {
@@ -96,7 +103,7 @@ function renderReport(report, type) {
 }
 
 function showAchievementPhotos(achievementId) {
-    fetch(`/Home/GetAchievementPhotos?achievementId=${achievementId}`)
+    fetch(`/Achievement/GetAchievementPhotos?achievementId=${achievementId}`)
         .then(res => res.json())
         .then(data => {
             if (data.success) {
