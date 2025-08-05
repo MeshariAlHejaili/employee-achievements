@@ -7,7 +7,7 @@ BEGIN
     );
 END;
 GO
-
+ 
 BEGIN TRANSACTION;
 IF NOT EXISTS (
     SELECT * FROM [__EFMigrationsHistory]
